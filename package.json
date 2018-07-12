@@ -1,0 +1,23 @@
+{
+  "name": "ezekiel",
+  "version": "0.1.0",
+  "description": "<3",
+  "main": "eze.js",
+  "scripts": {
+    "start": "node eze.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "discordbot"
+  ],
+  "author": "Bene",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "fs": "0.0.1-security",
+    "opusscript": "0.0.6",
+    "simple-youtube-api": "^5.0.2",
+    "ytdl-core": "^0.20.4"
+  }
+}
