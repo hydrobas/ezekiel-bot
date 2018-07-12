@@ -194,7 +194,14 @@ client.on("message", async msg =>
         ("Now currently playing: **" + serverQueue.songs[0].title + "**");
     }
     
-    // queue command --
+    // pudding command -- pudding
+    else if (msg.content.startsWith(prefix + "pudding"))
+    {
+        return msg.channel.send
+        ("<:custard:467017695188221952>");
+    }
+    
+    // queue command -- adds songs to the queue list
     else if (msg.content.startsWith(prefix + "queue"))
     {
         if (!serverQueue) return msg.channel.send
@@ -221,6 +228,7 @@ client.on("message", async msg =>
           + "\n\n **,np** -- See what song is currently playing."
           + "\n\n **,queue** -- See what song(s) are placed in the queue."
           + "\n\n **,volume** x -- Set the volume level. Replace the x with a number from 0 to 5."
+          + "\n\n **,pudding** -- <:custard:467017695188221952>"
           + "\n---------------------------------------------------"
           + "\n\n This section may be updated in the future to make it more visually appealing and improve readability.");
     }
