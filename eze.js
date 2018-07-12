@@ -1,5 +1,6 @@
 const { Client } = require("discord.js");
-const { token, prefix } = require("./config.js");
+const { prefix } = require("./config.js");
+const token      = process.env.token;
 const ytdl = require("ytdl-core");
 
 const client = new Client({ disableEveryone: true });
@@ -265,4 +266,4 @@ client.on("message", async msg =>
     }
 });
 
-client.login(process.env.token);
+client.login(token);
