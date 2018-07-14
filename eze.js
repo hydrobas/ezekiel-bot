@@ -207,15 +207,25 @@ client.on("message", async msg =>
         ("Now currently playing: **" + serverQueue.songs[0].title + "**");
     }
     
+    // ns command --
+    else if (msg.content.startsWith(`${prefix}ns`))
+    {
+        if (!serverQueue) return msg.content.channel.send
+        ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
+        
+        return msg.channel.send
+        ("Next song in queue: **" + serverQueue.songs[1].title + "**");
+    }
+    
     // pudding command -- pudding
-    else if (msg.content.startsWith(prefix + "pudding"))
+    else if (msg.content.startsWith(`${prefix}pudding`))
     {
         return msg.channel.send
         ("<:custard:467017695188221952>");
     }
 
     // queue command --
-    else if (msg.content.startsWith(prefix + "queue"))
+    else if (msg.content.startsWith(`${prefix}queue`))
     {
         if (!serverQueue) return msg.channel.send
         ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
@@ -234,17 +244,19 @@ client.on("message", async msg =>
         ("<:question:466962013596418058> Command Help\n"
           + "---------------------------------------------------"
           + "\n\n **,play** __youtube url__, __song title__, or __playlist url__ -- Play song. If there's already a song that's currently playing it will be added it to the queue instead. "
-          + "Please note that playlist will only work if 1) it's created or saved in your YouTube/Google account, and 2) playlist contains less than **22 videos**."
+          + "Please note that playlist will only work if it's created or saved into your YouTube/Google account."
           + "\n\n **,skip** -- Skip to the next song."
           + "\n\n **,pause** -- Pause the current song that's playing."
           + "\n\n **,resume** -- Resume the current song."
           + "\n\n **,stop** -- Stop and leave the voice channel."
+          + "\n\n **,queue** -- See what song(s) are placed in the queue. Please note that this command will not work if the bot is playing a huge playlist "
+          + "due to Discord's 2000 character limit per message. Please use the **,ns** command instead to work around this."
           + "\n\n **,np** -- See what song is currently playing."
-          + "\n\n **,queue** -- See what song(s) are placed in the queue."
+          + "\n\n **,ns** -- See what song will play next."
           + "\n\n **,volume** x -- Set the volume level. Replace the x with a number from 0 to 5."
           + "\n\n **,pudding** -- <:custard:467017695188221952>"
           + "\n\n---------------------------------------------------"
-          + "\n\n **14/07/18:** Added more information in play command section."
+          + "\n\n **14/07/18:** Added clarification in both play and queue commands sections. Added a new command (ns)."
           + "\nThis will be updated in the future to make it more visually appealing and improve readability.");
     }
 
