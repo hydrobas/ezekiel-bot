@@ -204,7 +204,7 @@ client.on("message", async msg =>
         ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
         
         return msg.channel.send
-        ("Now currently playing: **" + serverQueue.songs[0].title + "**");
+        (`Now playing: **${serverQueue.songs[0].title}**`);
     }
     
     // ns command --
@@ -214,7 +214,7 @@ client.on("message", async msg =>
         ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
         
         return msg.channel.send
-        ("Next song in queue: **" + serverQueue.songs[1].title + "**");
+        (`Next song in the queue: **${serverQueue.songs[1].title}**`);
     }
     
     // pudding command -- pudding
