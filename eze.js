@@ -12,9 +12,38 @@ const queue  = new Map();
 // Console Logs
 client.on("warn", console.warn);
 client.on("error", console.error);
-client.on("ready", () => console.log("I'm ready!"));
-client.on("disconnect", () => console.log("I just disconnected and wanted to let you know. I will reconnect now..."));
-client.on("reconnecting", () => console.log("I'm reconnecting now!"));
+client.on("ready", () =>
+{
+    console.log("I'm ready!");
+    client.user.setActivity(",help")
+});
+client.on("disconnect", () => console.log
+    ("I just disconnected and wanted to let you know. I will reconnect now..."));
+client.on("reconnecting", () => console.log
+    ("I'm reconnecting now!"));
+
+client.on("message", message =>
+{
+    if (message.isMentioned(client.user))
+    {
+        if (message.content.includes("who loves you?"))
+        {
+            message.channel.send
+            ("Bene <:blob_love:467627635434848276>");
+        }
+        
+        else if (message.content.includes("who do you love?"))
+        {
+            message.channel.send
+            ("Bene <:sparkling_heart:467622379254710282>");
+        }
+
+        else
+        {
+            return undefined;
+        }
+    }
+});
 
 client.on("message", async msg =>
 {
