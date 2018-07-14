@@ -1,6 +1,7 @@
 const { Client, Util } = require("discord.js");
-const { prefix, apiKey } = require("./config.js");
+const { prefix } = require("./config.js");
 const token = process.env.token;
+const apiKey = process.env.apiKey;
 const YouTube = require("simple-youtube-api");
 const ytdl = require("ytdl-core");
 
