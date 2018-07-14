@@ -233,7 +233,8 @@ client.on("message", async msg =>
         return msg.channel.send
         ("<:question:466962013596418058> Command Help\n"
           + "---------------------------------------------------"
-          + "\n\n **,play** __youtube url__, __song title__, or __playlist url__ -- Play song. If there's already a song that's currently playing it will add it to the queue instead. Please note that playlist only works if it's created or saved in your YouTube/Google account."
+          + "\n\n **,play** __youtube url__, __song title__, or __playlist url__ -- Play song. If there's already a song that's currently playing it will be added it to the queue instead. "
+          + "Please note that playlist will only work if 1) it's created or saved in your YouTube/Google account, and 2) playlist contains less than **22 videos**."
           + "\n\n **,skip** -- Skip to the next song."
           + "\n\n **,pause** -- Pause the current song that's playing."
           + "\n\n **,resume** -- Resume the current song."
