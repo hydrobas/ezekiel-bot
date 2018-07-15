@@ -1,41 +1,40 @@
-const { Client, Util } = require("discord.js");
-const { prefix } = require("./config.js");
-const token = process.env.token;
-const apiKey = process.env.apiKey;
-const YouTube = require("simple-youtube-api");
-const ytdl = require("ytdl-core");
+const { Client, Util }          = require('discord.js');
+const Discord                   = require('discord.js');
+const { prefix }                = require('./config.js');
+const token                     = process.env.token;
+const apiKey                    = process.env.apiKey;
+const YouTube                   = require('simple-youtube-api');
+const ytdl                      = require('ytdl-core');
 
-const client = new Client({ disableEveryone: true });
+const client  = new Client({ disableEveryone: true });
 const youtube = new YouTube(apiKey);
-const queue  = new Map();
+const queue   = new Map();
 
 // Console Logs
-client.on("warn", console.warn);
-client.on("error", console.error);
-client.on("ready", () =>
+client.on('warn', console.warn);
+client.on('error', console.error);
+client.on('ready', () =>
 {
-    console.log("I'm ready!");
-    client.user.setActivity(",help")
+    console.log('I\'m ready now!');
+    client.user.setActivity(',help');
 });
-client.on("disconnect", () => console.log
-    ("I just disconnected and wanted to let you know. I will reconnect now..."));
-client.on("reconnecting", () => console.log
-    ("I'm reconnecting now!"));
+client.on('disconnect', () => console.log('I just disconnected and wanted to let you know. I will reconnect now...'));
+client.on('reconnecting', () => console.log('I\'m reconnecting now!'));
 
-client.on("message", message =>
+client.on('message', message =>
 {
     if (message.isMentioned(client.user))
     {
-        if (message.content.includes("who loves you?"))
+        if (message.content.includes('who loves you?'))
         {
             message.channel.send
-            ("Bene <:blob_love:467627635434848276>");
+            ('Bene <:blob_love:467627635434848276>');
         }
-        
-        else if (message.content.includes("who do you love?"))
+
+        else if (message.content.includes('who do you love?'))
         {
             message.channel.send
-            ("Bene <:sparkling_heart:467622379254710282>");
+            ('Bene <:sparkling_heart:467622379254710282>');
         }
 
         else
@@ -45,56 +44,56 @@ client.on("message", message =>
     }
 });
 
-client.on("message", async msg =>
+client.on('message', async msg =>
 {
     // Bot will not respond if the author of the message is from itself or if there's no prefix
     if (msg.author.bot) return undefined;
     if (!msg.content.startsWith(prefix)) return undefined;
 
-    const args = msg.content.split(" ");
-    const searchString = args.slice(1).join(" ");
-    const url  = args[1] ? args[1].replace(/<(.+)>/g, '$1') : "";
-    const serverQueue = queue.get(msg.guild.id);
+    //
+    const args          = msg.content.substring(prefix.length).split(' ');
+    const searchString  = args.slice(1).join(' ');
+    const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
+    const serverQueue   = queue.get(msg.guild.id);
 
-    // play command -- this will play the song
-    if (msg.content.startsWith(`${prefix}play`))
+    // Bot Commands
+    switch (args[0].toLowerCase())
     {
+        // play command -- plays song
+        case 'play':
         const voiceChannel = msg.member.voiceChannel;
 
         // If user isn't in a voice channel
         if (!voiceChannel) return msg.channel.send
-        ("I'm sorry but you need to be in a voice channel to play a song!");
+        ('Sorry but you need to be in a voice channel first to play a song!');
 
         const permissions = voiceChannel.permissionsFor(msg.client.user);
 
-        // If bot hasn't received proper permissions to join & speak in voice channel
-        if (!permissions.has("CONNECT"))
+        // If bot hasn't received proper permissions to join & speak in a voice channel
+        if (!permissions.has('CONNECT'))
         {
             return msg.channel.send
-            ("I cannot connect to your voice channel. Please make sure I have the proper permissions!");
+            ('I cannot connect to your voice channel. Please make sure I have the proper permissions!');
         }
-
-        if (!permissions.has("SPEAK"))
+        if (!permissions.has('SPEAK'))
         {
             return msg.channel.send
-            ("I cannot speak in your voice channel. Please make sure I have the proper permissions!");
+            ('I cannot speak in your voice channel. Please make sure I have the proper permissions!');
         }
 
-        // Adding a playlist can only work if the playlist is from your YouTube account
+        // Adding a playlist can only work if the playlist is saved from user's YouTube account
         if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/))
         {
-            const playlist = await youtube.getPlaylist(url);
-            const videos   = await playlist.getVideos();
-            
+            const playlist  = await youtube.getPlaylist(url);
+            const videos    = await playlist.getVideos();
+
             for (const video of Object.values(videos))
             {
                 const video2 = await youtube.getVideoByID(video.id);
                 await handleVideo(video2, msg, voiceChannel, true);
             }
-
-            return msg.channel.send(`Playlist: **${playlist.title}** has been added to the queue!`);
+            return msg.channel.send(`:minidisc: Playlist: **${playlist.title}** has been added to the queue!`);
         }
-
         else
         {
             try
@@ -106,12 +105,11 @@ client.on("message", async msg =>
                 try
                 {
                     var videos = await youtube.searchVideos(searchString, 10);
-
                     let index = 0;
 
                     msg.channel.send
                     (`
-                    <:label:467525390626193409> **Song Selection:**
+                    :mag: **SONG SEARCH RESULTS**
                     \n${videos.map(video2 => `**${++index}** - ${video2.title}`).join('\n\n')}
                     \n---------------------------------------------------
                     \nPlease input a number ranging from **1~10** to select one of the search results within **15 seconds**.\nIf the time limit expires then song selection will be cancelled immediately, so please be careful!`);
@@ -130,9 +128,7 @@ client.on("message", async msg =>
                         console.error(err);
                         return msg.channel.send("<:no_entry_sign:467531099279458330> **CANCELLING:** No number entered within the 15 second timeframe. Cancelling song selection now...");
                     }
-
                     const videoIndex = parseInt(response.first().content);
-
                     var video  = await youtube.getVideoByID(videos[videoIndex - 1].id);
                 }
                 catch(err)
@@ -144,164 +140,151 @@ client.on("message", async msg =>
             }
                 return handleVideo(video, msg, voiceChannel);
         }
-    }
+        break;
 
-    // skip command -- this will skip the song to the next one in queue
-    else if (msg.content.startsWith(`${prefix}skip`))
-    {
+        // skip command -- skips to the next song
+        case 'skip':
         if (!msg.member.voiceChannel)
-        return msg.channel.send("You're not in a voice channel!");
+        return msg.channel.send
+        ('I can\'t skip to the next song if there\'s no song playing right now. Please add a song first!');
 
-        if (!serverQueue) return msg.channel.send
-        ("I can't skip to the next song if there's no song playing right now. Please add a song first!");
-
-        serverQueue.connection.dispatcher.end("Skip command has been used.");
+        serverQueue.connection.dispatcher.end('Skip command has been used.');
 
         return msg.channel.send
         (`Skipping to next song: **${serverQueue.songs[0].title}**`);
-        
         return undefined;
-    }
 
-    // pause command -- this will pause the song
-    else if (msg.content.startsWith(`${prefix}pause`))
-    {
+        break;
+
+        // pause command -- pauses song
+        case 'pause':
         if (serverQueue && serverQueue.playing)
         {
             serverQueue.playing = false;
-            serverQueue.connection.dispatcher.pause("Pause command has been used.");
-    
-            return msg.channel.send
-            ("OK! I have paused the current song for you.");
-        }
-        
-        return msg.channel.send
-        ("I can't pause the song if there's no song playing right now. Please add a song first!");
-    }
+            serverQueue.connection.dispatcher.pause('Pause command has been used.');
 
-    // stop command -- this will stop the song, bot will leave voice channel
-    else if (msg.content.startsWith(`${prefix}stop`))
-    {
+            return msg.channel.send
+            ('OK! I have paused the current song for you.');
+        }
+        // If someone uses this command while there's no song playing
+        return msg.channel.send
+        ('I can\'t pause the song if there\'s no song playing right now. Please add a song first!');
+
+        break;
+
+        // stop command -- stops song
+        case 'stop':
         if (!msg.member.voiceChannel)
         return msg.channel.send
-        ("You're not in a voice channel!");
+        ('You need to be in a voice channel first before you can use the stop command!');
         if (!serverQueue) return msg.channel.send
-        ("I can't stop the song if there's no song playing right now. Please add a song first!");
-        
+        ('I can\'t stop the song if there\'s no song playing right now. Please add a song first!');
+
         serverQueue.songs = [];
-        serverQueue.connection.dispatcher.end("Stop command has been used.");
+        serverQueue.connection.dispatcher.end('Stop command has been used.');
 
         return undefined;
-    }
 
-    // resume command -- this will resume the song
-    else if (msg.content.startsWith(`${prefix}resume`))
-    {
+        break;
+
+        // resume command -- resumes paused song
+        case 'resume':
         if (serverQueue && !serverQueue.playing)
         {
             serverQueue.playing = true;
-            serverQueue.connection.dispatcher.resume("Resume command has been used.");
+            serverQueue.connection.dispatcher.resume('Resume command has been used.');
 
             return msg.channel.send
-            ("OK! I have resumed the current song for you.");
+            ('OK! I have resumed the current song for you.');
         }
-        
+        // If someone uses this command before giving the bot a song to play
         return msg.channel.send
-        ("I can't resume the song if there's no song playing right now. Please add a song first!");
-    }
+        ('I can\'t resume the song if there\'s no song playing right now. Please add a song first!');
 
-    // volume command -- this will allow user to set volume level
-    else if (msg.content.startsWith(`${prefix}volume`))
-    {
+        break;
+
+        // volume command -- adjust volume level
+        case 'vol':
+        case 'volume':
         if (!serverQueue) return msg.channel.send
-        ("I can't set the volume level if there's no song playing right now. Please add a song first!");
+        ('I can\'t set the volume level if there\'s no song playing right now. Please add a song first!');
 
         if (!args[1]) return msg.channel.send
-        (`The current volume is: **${serverQueue.volume}**`);
+        (`Current volume is: **${serverQueue.volume}**`);
 
         serverQueue.volume = args[1];
         serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
 
         return msg.channel.send
         (`I have set the volume to **${[args[1] / 5]}**`);
-    }
 
-    // np command -- stands for "now playing" -- shows what song is currently playing
-    else if (msg.content.startsWith(`${prefix}np`))
-    {
+        break;
+
+        // np command -- now playing; see what song is currently playing
+        case 'np':
         if (!serverQueue) return msg.content.channel.send
-        ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
+        ('There\'s no song playing right now so it isn\'t possible for me to do this command. Please add a song first!');
+
+        return msg.channel.send
+        (`:sparkles: Now playing: **${serverQueue.songs[0].title}**`);
+
+        break;
+
+        // ns command -- next song; see what song will play next
+        case 'ns':
+        if (!serverQueue) return msg.content.channel.send
+        ('There\'s no song playing right now so it isn\'t possible for me to do this command. Please add a song first!');
         
         return msg.channel.send
-        (`Now playing: **${serverQueue.songs[0].title}**`);
-    }
-    
-    // ns command --
-    else if (msg.content.startsWith(`${prefix}ns`))
-    {
-        if (!serverQueue) return msg.content.channel.send
-        ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
-        
-        return msg.channel.send
-        (`Next song in the queue: **${serverQueue.songs[1].title}**`);
-    }
-    
-    // pudding command -- pudding
-    else if (msg.content.startsWith(`${prefix}pudding`))
-    {
-        return msg.channel.send
-        ("<:custard:467017695188221952>");
-    }
+        (`:sparkles: Next song in the queue: **${serverQueue.songs[1].title}**`);
 
-    // queue command --
-    else if (msg.content.startsWith(`${prefix}queue`))
-    {
+        break;
+
+        // queue command -- see what song(s) are listed in the queue
+        case 'queue':
         if (!serverQueue) return msg.channel.send
-        ("There's no song playing right now so it isn't possible for me to do this command. Please add a song first!");
+        ('There\'s no song playing right now so it isn\'t possible for me to do this command. Please add a song first!');
 
         return msg.channel.send
-        ("<:notes:466952873951887362> **QUEUE LIST:**\n\n"
-         + serverQueue.songs.map(song => "**• **"
-         + song.title).join("\n\n")
-         + "\n\n **Now Playing: **" + serverQueue.songs[0].title);
-    }
+        (':page_facing_up: **QUEUE LIST**\n\n'
+        + serverQueue.songs.map(song => '**• **'
+        + song.title).join('\n\n')
+        + '\n\n **Now Playing: **' + serverQueue.songs[0].title);
 
-    // help command -- prints out a list of commands
-    else if (msg.content.startsWith(prefix + "help"))
-    {
+        break;
+
+        case 'help':
         return msg.channel.send
         ("<:question:466962013596418058> Command Help\n"
           + "---------------------------------------------------"
-          + "\n\n **,play** __youtube url__, __song title__, or __playlist url__ -- Play song. If there's already a song that's currently playing it will be added to the queue instead. "
-          + "Please note that playlist will only work if it's created or saved into your YouTube/Google account."
-          + "\n\n **,skip** -- Skips to the next song in the queue."
-          + "\n\n **,pause** -- Pauses the current song if it's playing."
-          + "\n\n **,resume** -- Resumes the current song if paused."
-          + "\n\n **,stop** -- Stops playing current song and the bot will leave the voice channel."
-          + "\n\n **,queue** -- See what song(s) are placed in the queue. Please note that this command will not work if the bot has queued a huge playlist "
-          + "due to Discord's 2000 character limit per message. Please use the **,ns** command instead to work around this."
-          + "\n\n **,np** -- Now playing; see what song is currently playing."
-          + "\n\n **,ns** -- Next song; see what song will play next."
-          + "\n\n **,volume** x -- Set the volume level. Replace the x with a number from **0~5**."
-          + "\n\n **,pudding** -- <:custard:467017695188221952>"
+          + "\n\n **,play** __youtube url__, __song title__, or __playlist url__ -- Play song. If there's already a song that's currently playing it will add it to the queue instead. Please note that playlist only works if it's created or saved in your YouTube/Google account."
+          + "\n\n **,skip** -- Skip to the next song."
+          + "\n\n **,pause** -- Pause the current song that's playing."
+          + "\n\n **,resume** -- Resume the current song."
+          + "\n\n **,stop** -- Stop and leave the voice channel."
+          + "\n\n **,np** -- See what song is currently playing."
+          + "\n\n **,queue** -- See what song(s) are placed in the queue."
+          + "\n\n **,volume** || **,vol** x -- Set the volume level. Replace the x with a number from 0 to 5."
           + "\n\n---------------------------------------------------"
-          + "\n\n **14/07/18:** Added clarification in both play and queue commands sections. Added a new command (ns)."
+          + "\n\n **14/07/18:** Added more information in play command section."
           + "\nThis will be updated in the future to make it more visually appealing and improve readability.");
+          break;
+
+        case 'test':
+        var embed = new Discord.RichEmbed()
+            .setAuthor('Now Playing', client.user.avatarURL)
+            .setTitle(`${serverQueue.songs[0].title}`)
+            .addField('Test Title 1', 'Test Description 1', true)
+            .addField('Test Title 2', 'Test Description 2', true)
+            .setColor(15836697)
+            .setThumbnail(client.user.avatarURL)
+
+        msg.channel.send({embed});
+        break;
+        default:
+        msg.channel.send('Invalid command!');
+          
     }
-
-
-    // leave command -- bot will leave the voice channel
-    else if (msg.content.startsWith(prefix + "leave"))
-    {
-        if (!msg.member.voiceChannel)
-        return msg.channel.send
-        ("You're not in a voice channel!");
-
-        msg.member.voiceChannel.leave();
-    }
-
-    return undefined;
-
     async function handleVideo(video, msg, voiceChannel, playlist = false)
     {
         const serverQueue = queue.get(msg.guild.id);
@@ -312,8 +295,8 @@ client.on("message", async msg =>
             title: Util.escapeMarkdown(video.title),
             url: `https://www.youtube.com/watch?v=${video.id}`
         };
-        
-        // Creating queue
+
+        // Creates queue
         if (!serverQueue)
         {
             const queueConstruct =
@@ -325,45 +308,39 @@ client.on("message", async msg =>
                 volume: 5,
                 playing: true
             };
-
             queue.set(msg.guild.id, queueConstruct);
-
             queueConstruct.songs.push(song);
-
+            
             // Bot joining voice channel
             try
             {
-                var connection = await voiceChannel.join();
+                var connection            = await voiceChannel.join();
                 queueConstruct.connection = connection;
 
                 play(msg.guild, queueConstruct.songs[0]);
             }
-
-            // If bot is not able to join voice channel
             catch(error)
             {
-                console.error("Unable to join voice channel.");
+                console.error('Unable to join voice channel.');
                 queue.delete(msg.guild.id);
-                return msg.channel.send("Unable to join voice channel!");
+                return msg.channel.send('Unable to join voice channel!');
             }
-
-            // Informs user that the song is now playing
-            return msg.channel.send(`**${song.title}** is now playing!`);
+            // Informs user that song is now playing
+            return msg.channel.send(`:notes: **${song.title}** is now playing!`);
         }
-
         else
         {
             serverQueue.songs.push(song);
             console.log(serverQueue.songs);
-            
-            if(playlist) return undefined;
-            
-            // Add song to the queue
-            else return msg.channel.send(`**${song.title}** has been added to the queue!`);
+
+            if (playlist) return undefined;
+
+            // Adds song into queue
+            else return msg.channel.send
+            (`**${song.title}** has been added to the queue!`);
         }
         return undefined;
     }
-
     function play(guild, song)
     {
         const serverQueue = queue.get(guild.id);
@@ -374,22 +351,18 @@ client.on("message", async msg =>
             queue.delete(guild.id);
             return;
         }
-
         const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
-            .on("end", (reason) =>
+            .on('end', (reason) =>
                 {
-                    console.log
-                    (reason);
-
+                    console.log(reason);
                     serverQueue.songs.shift();
+                    // I think somewhere here I need to add a recursive function to make song repeat/loop
                     play(guild, serverQueue.songs[0]);
                 })
-            
-            .on("error", error => console.error(error));
+            .on('error', error => console.error(error));
 
-            //Volume
+            // Volume
             dispatcher.setVolumeLogarithmic(5 / 5);
     }
 });
-
 client.login(process.env.token);
